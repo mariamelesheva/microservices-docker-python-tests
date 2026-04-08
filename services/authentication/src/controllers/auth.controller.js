@@ -5,19 +5,33 @@ const Auth = require('../models/auth.model');
 const config = require('../environment/config');
 
 const authController = {
-  authenticate: async (ctx) => {
+    authenticate: async (ctx) => {
     try {
+      console.log('1. Request received for:', ctx.request.body.emailAddress);
       const user = await Auth.findOne({ emailAddress: ctx.request.body.emailAddress });
-      if (!user) ctx.throw(404);
-      if (!(bcrypt.compareSync(ctx.request.body.password, user.password))) {
+      console.log('2. User found:', user ? 'Yes' : 'No');
+
+      if (!user) {
+        console.log('3. User not found, throwing 404');
+        ctx.throw(404);
+      }
+
+      console.log('4. Comparing passwords...');
+      const passwordMatch = bcrypt.compareSync(ctx.request.body.password, user.password);
+      console.log('5. Password match:', passwordMatch);
+
+      if (!passwordMatch) {
         ctx.body = { auth: false, token: null };
       } else {
+        console.log('6. Generating token...');
         const token = jwt.sign({ id: user.emailAddress, role: user.role }, config.jwtsecret, {
-          expiresIn: 86400, // expires in 24 hours
+          expiresIn: 86400,
         });
         ctx.body = { auth: true, token };
       }
     } catch (err) {
+      console.log('ERROR in authenticate:', err.message);
+      console.log('Full error:', err);
       ctx.throw(500);
     }
   },

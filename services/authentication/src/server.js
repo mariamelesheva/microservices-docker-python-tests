@@ -8,12 +8,15 @@ const Mongoose = require('mongoose');
 const config = require('./environment/config');
 const app = require('./app');
 
-// Init Database Connection
-Mongoose.connect(config.db.uri, { user: config.db.username, pass: config.db.password });
-Mongoose.connection.on('error', console.error);
+console.log('DB URI from config:', config.db.uri);
 
-// Start Listening to Subscribed Events
-require('./message-bus/recieve/user.added').start();
+// Init Database Connection
+Mongoose.connect(config.db.uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+Mongoose.connection.on('error', console.error);
+Mongoose.connection.on('connected', () => console.log('MongoDB connected successfully'));
 
 // Run the API Server
 app.listen(config.port, () => {

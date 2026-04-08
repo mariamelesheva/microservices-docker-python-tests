@@ -9,7 +9,7 @@ const config = require('./environment/config');
 const app = require('./app');
 
 // Init Database Connection
-Mongoose.connect(config.db.uri, { user: config.db.username, pass: config.db.password });
+Mongoose.connect(config.db.uri);
 Mongoose.connection.on('error', console.error);
 
 // Run the API Server

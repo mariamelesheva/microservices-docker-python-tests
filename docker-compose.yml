@@ -9,11 +9,15 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - DB_URI=mongodb://mongodb:27017/articles_db?ssl=false
       - PORT=3000
       - MESSAGE_BUS=amqp://rabbitmq
-    links:
-      - rabbitmq
-  
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
   events-management:
     container_name: events-management
     build:
@@ -22,11 +26,15 @@ services:
     ports:
       - "3001:3000"
     environment:
+      - DB_URI=mongodb://mongodb:27017/events_db?ssl=false
       - PORT=3000
       - MESSAGE_BUS=amqp://rabbitmq
-    links:
-      - rabbitmq
-  
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
   user-management:
     container_name: user-management
     build:
@@ -35,11 +43,15 @@ services:
     ports:
       - "3002:3000"
     environment:
+      - DB_URI=mongodb://mongodb:27017/users_db?ssl=false
       - PORT=3000
       - MESSAGE_BUS=amqp://rabbitmq
-    links:
-      - rabbitmq
-  
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
   authentication:
     container_name: authentication
     build:
@@ -48,11 +60,16 @@ services:
     ports:
       - "3003:3000"
     environment:
+      - DB_URI=mongodb://mongodb:27017/auth_db
+      - DB_URI=mongodb://mongodb:27017/auth_db?ssl=false
       - PORT=3000
       - MESSAGE_BUS=amqp://rabbitmq
-    links:
-      - rabbitmq
-  
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
+
   notification:
     container_name: notification
     build:
@@ -64,9 +81,28 @@ services:
       - EMAIL_ID=noreply.localnewsapplication@gmail.com
       - EMAIL_PASSWORD=Testing0*
       - ADMIN_EMAIL=localnewsapp340ct@gmail.com
-    links:
-      - rabbitmq
+    depends_on:
+      rabbitmq:
+        condition: service_started
 
   rabbitmq:
     container_name: rabbitmq
     image: rabbitmq:3.7.4
+    ports:
+      - "15672:15672"
+
+  mongodb:
+    image: mongo:4.4
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongo", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongo_data:

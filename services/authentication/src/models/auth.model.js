@@ -9,4 +9,4 @@ const AuthSchema = new mongoose.Schema({
   status: { type: String, default: 'active' },
 });
 
-module.exports = mongoose.model('Auth', AuthSchema);
+module.exports = mongoose.model('Auth', AuthSchema, 'users');
