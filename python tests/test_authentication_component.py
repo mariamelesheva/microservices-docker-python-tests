@@ -12,9 +12,12 @@ class TestAuthenticationComponent:
 
     @pytest.fixture(scope="module")
     def docker_compose(self):
-        """Поднимаем всё через docker-compose"""
-        subprocess.run(["docker-compose", "up", "-d"], check=True)
-        time.sleep(15)  # Ждём полной инициализации всех сервисов
+        # Запускаем ТОЛЬКО нужные сервисы
+        subprocess.run(
+            ["docker-compose", "up", "-d", "mongodb", "rabbitmq", "authentication"],
+            check=True
+        )
+        time.sleep(15)
         yield
         subprocess.run(["docker-compose", "down"], check=True)
 
