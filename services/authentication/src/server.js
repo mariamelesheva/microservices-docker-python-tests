@@ -7,6 +7,7 @@ require('dotenv').config();
 const Mongoose = require('mongoose');
 const config = require('./environment/config');
 const app = require('./app');
+const userAddedListener = require('./message-bus/recieve/user.added');  // ← Добавьте импорт
 
 console.log('DB URI from config:', config.db.uri);
 
@@ -17,6 +18,11 @@ Mongoose.connect(config.db.uri, {
 });
 Mongoose.connection.on('error', console.error);
 Mongoose.connection.on('connected', () => console.log('MongoDB connected successfully'));
+
+// Запускаем RabbitMQ listener ПОСЛЕ подключения к БД
+Mongoose.connection.on('connected', async () => {
+  await userAddedListener.start();  // ← Запускаем listener
+});
 
 // Run the API Server
 app.listen(config.port, () => {

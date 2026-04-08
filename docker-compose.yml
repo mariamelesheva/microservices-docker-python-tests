@@ -89,7 +89,8 @@ services:
     container_name: rabbitmq
     image: rabbitmq:3.7.4-management
     ports:
-      - "15672:15672"
+      - "5672:5672"      # ← ДОБАВИТЬ ЭТО (AMQP порт)
+      - "15672:15672"    # ← Уже есть (веб-интерфейс)
 
   mongodb:
     image: mongo:4.4
